@@ -9,7 +9,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Sidebar controls
 st.sidebar.markdown("## 🎛️ Customize Your Session")
 tier = st.sidebar.selectbox("Your Case Prep Level:", ["Beginner", "Intermediate", "Interview-Ready"])
 hint_mode = st.sidebar.toggle("Hint Mode", value=True)
@@ -24,13 +23,10 @@ st.sidebar.markdown("---")
 api_key = st.sidebar.text_input("🔑 Enter your OpenAI API Key:", type="password")
 submit = st.sidebar.button("Run Agent")
 
-# Text input
 user_input = st.text_area("📝 Enter your case prompt, response, or summary depending on the selected tool:", height=200)
 
-# Define prompt logic
 def build_prompt(tier, hint, feature, user_input):
     hint_line = " Provide guidance to the user." if hint else " Do not give hints unless asked."
-
     if feature == "Case Decomposition Assistant":
         return f"You are a case interview coach. Break this case into components: framework, key issues, data needed, and hypotheses. Case: {user_input}.{hint_line}"
     elif feature == "Live Rubric Feedback":
@@ -42,13 +38,12 @@ def build_prompt(tier, hint, feature, user_input):
     else:
         return "Invalid feature."
 
-# API call and output
 if submit and api_key and user_input:
     with st.spinner("Thinking like a consultant..."):
         try:
-            openai.api_key = api_key
+            client = openai.OpenAI(api_key=api_key)
             prompt = build_prompt(tier, hint_mode, feature, user_input)
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are a helpful case interview coach for MBA students."},
@@ -57,7 +52,7 @@ if submit and api_key and user_input:
                 temperature=0.7
             )
             st.markdown("### 🤖 Agent Response:")
-            st.markdown(response["choices"][0]["message"]["content"])
+            st.markdown(response.choices[0].message.content)
         except Exception as e:
             st.error(f"Something went wrong: {e}")
 elif submit and not api_key:
