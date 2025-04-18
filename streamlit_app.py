@@ -44,7 +44,7 @@ if submit and api_key and user_input:
             client = openai.OpenAI(api_key=api_key)
             prompt = build_prompt(tier, hint_mode, feature, user_input)
             response = client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful case interview coach for MBA students."},
                     {"role": "user", "content": prompt}
